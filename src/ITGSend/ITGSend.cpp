@@ -604,7 +604,7 @@ void *flowParser(void *param)
 	flows[id].srcAddrSpecify = false;	
 	flows[id].dstAddrSpecify = false;	
 	flows[id].dstPortSpecify = false;	
-	flows[id].minPayloadSize = StandardMinPayloadSize;
+	flows[id].min_p_size = StandardMinPayloadSize;
 	flows[id].payloadLogType = payloadLogType;
 	flows[id].mean_adjustment = mean_adjustment;
 
@@ -726,10 +726,10 @@ void *flowParser(void *param)
 					if ((flows[id].payloadLogType != 0) && (flows[id].meter == METER_RTTM ))
 						ReportErrorAndExit("General parser", "It is possible to use the RTT meter only with the standard payload type", programName, 0);
 					if (flows[id].payloadLogType == PL_SHORT)
-						flows[id].minPayloadSize = ShortMinPayloadSize;
+						flows[id].min_p_size = ShortMinPayloadSize;
 
 					else if (flows[id].payloadLogType == PL_NONE)
-						flows[id].minPayloadSize = NoneMinPayloadSize;
+						flows[id].min_p_size = NoneMinPayloadSize;
 
 					h += 2;
 					argc -= 2;
@@ -749,8 +749,8 @@ void *flowParser(void *param)
 				if (flows[id].meter == 255) {
 					ReportErrorAndExit("General parser", "Invalid measure type", programName, 0);
 				}
-				if ((flows[id].meter == METER_RTTM) && (flows[id].minPayloadSize < StandardMinPayloadSize)) {
-					printf("%d != %d ", flows[id].minPayloadSize, StandardMinPayloadSize);
+				if ((flows[id].meter == METER_RTTM) && (flows[id].min_p_size < StandardMinPayloadSize)) {
+					printf("%d != %d ", flows[id].min_p_size, StandardMinPayloadSize);
 					ReportErrorAndExit("General parser", "It is possible to use the RTT meter only with the standard payload type",
 							programName, 0);
 				}
@@ -1026,7 +1026,7 @@ void *flowParser(void *param)
 
 				
 				
-					flows[id].minPayloadSize = flows[id].minPayloadSize + sizeof(int);
+					flows[id].min_p_size = flows[id].min_p_size + sizeof(int);
 
 				
 				if (flows[id].l4Proto == L4_PROTO_ICMP) {
@@ -1330,7 +1330,7 @@ void *flowParser(void *param)
 			   
 			case 'c':
 				if ((argc < 2) || (atoi(argv[h + 1]) < 1))
-					ReportErrorAndExit("Protocol Parser", "Invalid pkt size",
+					ReportErrorAndExit("Protocol Parser", "Invalid pkt itg_size",
 					    programName, id);
 				delete flows[id].PktSize;
 				flows[id].PktSizeDistro = pdConstant;
@@ -1342,7 +1342,7 @@ void *flowParser(void *param)
 			case 'u':
 				if ((argc < 3) || (atoi(argv[h + 1]) < 1)
 				    || (atoi(argv[h + 2]) <= atoi(argv[h + 1])))
-					ReportErrorAndExit("Protocol Parser", "Invalid pkt size",
+					ReportErrorAndExit("Protocol Parser", "Invalid pkt itg_size",
 					    programName, id);
 				delete flows[id].PktSize;
 				flows[id].PktSizeDistro = pdUniform;
@@ -1355,7 +1355,7 @@ void *flowParser(void *param)
 				break;
 			case 'e':
 				if ((argc < 2) || (atoi(argv[h + 1]) < 1))
-					ReportErrorAndExit("Protocol Parser", "Invalid pkt size",
+					ReportErrorAndExit("Protocol Parser", "Invalid pkt itg_size",
 					    programName, id);
 				delete flows[id].PktSize;
 				flows[id].PktSizeDistro = pdExponential;
@@ -1393,7 +1393,7 @@ void *flowParser(void *param)
 				break;
 			case 'n':
 				if ((argc < 3) || (argv[h + 2] == NULL))	
-					ReportErrorAndExit("Protocol Parser", "Invalid pkt size",
+					ReportErrorAndExit("Protocol Parser", "Invalid pkt itg_size",
 					    programName, id);
 				delete flows[id].PktSize;
 				flows[id].PktSizeDistro = pdNormal;
@@ -1406,7 +1406,7 @@ void *flowParser(void *param)
 				break;
 			case 'o':
 				if ((argc < 2) || (atoi(argv[h + 1]) < 0))	
-					ReportErrorAndExit("Protocol Parser", "Invalid pkt size",
+					ReportErrorAndExit("Protocol Parser", "Invalid pkt itg_size",
 					    programName, id);
 				a = atoi(argv[h + 1]);
 				delete flows[id].PktSize;
@@ -1978,7 +1978,7 @@ void *flowParser(void *param)
 
 void *signalManager(void *id)
 {
-	int	chanId, sock, size;
+	int	chanId, sock, itg_size;
 	BYTE	type;
 	uint32_t flowId;
 	struct pipeMsg msg;
@@ -2046,8 +2046,8 @@ void *signalManager(void *id)
 
 			
 			type=0xFF;	
-			size = recv(sock, (char *) &type, sizeof(type), 0);
-			if (size <= 0) {
+			itg_size = recv(sock, (char *) &type, sizeof(type), 0);
+			if (itg_size <= 0) {
 				ReportErrorAndExit("signalManager","Receiver has shut down the connection gracefully",programName,0);
 			}
 			PRINTD(1,"signalManager: received type %d on socket\n", type);
@@ -3088,10 +3088,10 @@ void *flowSender(void *para)
 	
 	if(SizeFile==false){																
 		
-		size = (int) PktSize->Next();
+		itg_size = (int) PktSize->Next();
 	}else{																				
 		
-		size=flows[id].vectSize[indexVectSize];											
+		itg_size=flows[id].vectSize[indexVectSize];											
 		
 		indexVectSize = (indexVectSize + 1)%dimVectSize;								
 	}
@@ -3100,19 +3100,19 @@ void *flowSender(void *para)
 #else
 	if ((l4Proto == L4_PROTO_TCP) && (flows[id].payloadLogType != PL_NONE)) {
 #endif
-		flows[id].minPayloadSize = flows[id].minPayloadSize + sizeof(net_size); 
+		flows[id].min_p_size = flows[id].min_p_size + sizeof(net_size); 
 
-		if (size > MAX_PAYLOAD_SIZE)
-			size = MAX_PAYLOAD_SIZE;
-		else if (size < (flows[id].minPayloadSize)) 	
-			size = flows[id].minPayloadSize;	
+		if (itg_size > MAX_PAYLOAD_SIZE)
+			itg_size = MAX_PAYLOAD_SIZE;
+		else if (itg_size < (flows[id].min_p_size)) 	
+			itg_size = flows[id].min_p_size;	
 	} else {
-		if (size > MAX_PAYLOAD_SIZE)
-			size = MAX_PAYLOAD_SIZE;
-		else if (size < flows[id].minPayloadSize)
-			size = flows[id].minPayloadSize;
+		if (itg_size > MAX_PAYLOAD_SIZE)
+			itg_size = MAX_PAYLOAD_SIZE;
+		else if (itg_size < flows[id].min_p_size)
+			itg_size = flows[id].min_p_size;
 	}
-	PRINTD(1,"flowSender: Payload minimum size for first packet %d \n",flows[id].minPayloadSize);
+	PRINTD(1,"flowSender: Payload minimum itg_size for first packet %d \n",flows[id].min_p_size);
 	PRINTD(1,"flowSender: Size for first packet %d\n",itg_size);
 
  	
@@ -3172,7 +3172,7 @@ void *flowSender(void *para)
 			
 			if (flows[id].dimPayloadBuffer != 0) {
 				
-				int byteToCopy = size - (int) (ptrToTruePayload - payload);
+				int byteToCopy = itg_size - (int) (ptrToTruePayload - payload);
 
 				
 				if ((indexBuffer + byteToCopy) <= flows[id].dimPayloadBuffer) {
@@ -3191,7 +3191,7 @@ void *flowSender(void *para)
 					memcpy(ptrToTruePayload, (void *) ((long int) flows[id].ptrPayloadBuffer + indexBuffer),
 							byteToCopy);
 					
-					memset((void *) ((long int) ptrToTruePayload + byteToCopy), 0, (size - byteToCopy));
+					memset((void *) ((long int) ptrToTruePayload + byteToCopy), 0, (itg_size - byteToCopy));
 					
 					indexBuffer = 0;
 
@@ -3205,9 +3205,9 @@ void *flowSender(void *para)
 					pkt.icmp_buf.icmp_type = icmptype;
 					pkt.icmp_buf.icmp_code = 0;
 					pkt.icmp_buf.icmp_cksum = 0;
-					memcpy(&pkt.packet, payload, size);
-					pkt.icmp_buf.icmp_cksum = checksum((unsigned short *) &pkt, size + sizeof(icmp));
-					sockchk = sendto(sock, (char *) &pkt, size + sizeof(icmp), 0, DestHost->ai_addr,
+					memcpy(&pkt.packet, payload, itg_size);
+					pkt.icmp_buf.icmp_cksum = checksum((unsigned short *) &pkt, itg_size + sizeof(icmp));
+					sockchk = sendto(sock, (char *) &pkt, itg_size + sizeof(icmp), 0, DestHost->ai_addr,
 							DestHost->ai_addrlen);
 				} else if (DestHost->ai_family == AF_INET6) {
 #ifdef UNIX
@@ -3215,26 +3215,26 @@ void *flowSender(void *para)
 					pkt.icmp_buf.icmp_type = icmptype;
 					pkt.icmp_buf.icmp_code = 0;
 					pkt.icmp_buf.icmp_cksum = 0;
-					memcpy(&pkt.packet, payload, size);
-					pkt.icmp_buf.icmp_cksum = checksum((unsigned short *) &pkt, size + sizeof(icmpv6));
+					memcpy(&pkt.packet, payload, itg_size);
+					pkt.icmp_buf.icmp_cksum = checksum((unsigned short *) &pkt, itg_size + sizeof(icmpv6));
 					struct sockaddr_in6 from;
 					from.sin6_family = AF_INET6;
 					from.sin6_port = 0;
 					from.sin6_addr = ((struct sockaddr_in6*) (DestHost->ai_addr))->sin6_addr;
-					sockchk = sendto(sock, (char *) &pkt, size + sizeof(icmpv6), 0, (sockaddr *) &from,
+					sockchk = sendto(sock, (char *) &pkt, itg_size + sizeof(icmpv6), 0, (sockaddr *) &from,
 							sizeof(from));
 #endif
 				}
 #ifndef SCTP
 			} else {
-				sockchk = send(sock, (char *) payload, size, 0);
+				sockchk = send(sock, (char *) payload, itg_size, 0);
 			}
 #else
 			} else if (l4Proto != L4_PROTO_SCTP) {
-				sockchk = send(sock, (char *) payload, size, 0);
+				sockchk = send(sock, (char *) payload, itg_size, 0);
 			} else {
 				ppid = rand();
-				sockchk = sctp_sendmsg(sock, (char *) payload, size, (struct sockaddr *) DestHost->ai_addr,
+				sockchk = sctp_sendmsg(sock, (char *) payload, itg_size, (struct sockaddr *) DestHost->ai_addr,
 						DestHost->ai_addrlen, ppid, 0, sctpStream, 0, 0);
 			}
 #endif
@@ -3276,17 +3276,17 @@ void *flowSender(void *para)
 					}
 
 					if (l7Proto == L7_PROTO_TELNET)
-						size = size - 20;
+						itg_size = itg_size - 20;
 					if (logremoto == 0) {
 						
 						writeInBufferStandard(&infos[count], htonl(id), htonl(seqNum), HelpSrcAddress,
 								HelpDstAddress, tmpPort_SrcPort, tmpPort_DstPort, time, time,
-								Ticker.lastTime.tv_usec, Ticker.lastTime.tv_usec, size); 
+								Ticker.lastTime.tv_usec, Ticker.lastTime.tv_usec, itg_size); 
 					} else {
 						
 						writeInBufferStandard(&infos[count], htonl(id), htonl(seqNum), HelpSrcAddress,
 								HelpDstAddress, tmpPort_SrcPort, tmpPort_DstPort, time, time,
-								Ticker.lastTime.tv_usec, Ticker.lastTime.tv_usec, size); 
+								Ticker.lastTime.tv_usec, Ticker.lastTime.tv_usec, itg_size); 
 						infosHostToNet(&infos[count]);
 					}
 
@@ -3302,10 +3302,10 @@ void *flowSender(void *para)
 			
 			if (SizeFile == false) {									
 				
-				size = (int) PktSize->Next();
+				itg_size = (int) PktSize->Next();
 			} else {											
 				
-				size = flows[id].vectSize[indexVectSize];						
+				itg_size = flows[id].vectSize[indexVectSize];						
 				
 				indexVectSize = (indexVectSize + 1) % dimVectSize;					
 			}
@@ -3314,17 +3314,17 @@ void *flowSender(void *para)
 #else
 			if ((l4Proto == L4_PROTO_TCP) && (flows[id].payloadLogType != PL_NONE)) {
 #endif
-				if (size > MAX_PAYLOAD_SIZE)
-					size = MAX_PAYLOAD_SIZE;
-				else if (size < (flows[id].minPayloadSize))	
-					size = flows[id].minPayloadSize;	
+				if (itg_size > MAX_PAYLOAD_SIZE)
+					itg_size = MAX_PAYLOAD_SIZE;
+				else if (itg_size < (flows[id].min_p_size))	
+					itg_size = flows[id].min_p_size;	
 			} else {
-				if (size > MAX_PAYLOAD_SIZE)
-					size = MAX_PAYLOAD_SIZE;
-				else if (size < flows[id].minPayloadSize)
-					size = flows[id].minPayloadSize;
+				if (itg_size > MAX_PAYLOAD_SIZE)
+					itg_size = MAX_PAYLOAD_SIZE;
+				else if (itg_size < flows[id].min_p_size)
+					itg_size = flows[id].min_p_size;
 			}
-			PRINTD(1,"flowSender: Payload minimum size for next packet %d \n",flows[id].minPayloadSize);
+			PRINTD(1,"flowSender: Payload minimum itg_size for next packet %d \n",flows[id].min_p_size);
 			PRINTD(2,"flowSender: Size for next packet %d\n",itg_size);
 
 			
@@ -3391,13 +3391,13 @@ void *flowSender(void *para)
 						if (l4Proto == L4_PROTO_TCP)
 							
 							size_r = TCPrecvPacket((unsigned char *) payload, sock,
-									flows[id].minPayloadSize, flows[id].payloadLogType);
+									flows[id].min_p_size, flows[id].payloadLogType);
 #ifdef SCTP
 						else if (l4Proto == L4_PROTO_SCTP) {
 							size_r = SCTPrecvPacket((unsigned char *) payload, sock, sctpId,
-									flows[id].minPayloadSize, flows[id].payloadLogType);
-							PRINTD(2, "flowSender: in sctp settato flows[id].minPayloadSize: %d\n",
-									flows[id].minPayloadSize);
+									flows[id].min_p_size, flows[id].payloadLogType);
+							PRINTD(2, "flowSender: in sctp settato flows[id].min_p_size: %d\n",
+									flows[id].min_p_size);
 						}
 #endif
 #ifdef DCCP					
@@ -3515,11 +3515,11 @@ void *flowSender(void *para)
 					GET_TIME_OF_DAY(&RcvTime, _tend, _tstart, secondi, microsecondi, meter, 0);
 
 					if (l4Proto == L4_PROTO_TCP)
-						TCPrecvPacket((unsigned char *) payload, sock, flows[id].minPayloadSize,
+						TCPrecvPacket((unsigned char *) payload, sock, flows[id].min_p_size,
 								flows[id].payloadLogType);
 #ifdef SCTP
 					else if (l4Proto == L4_PROTO_SCTP) {
-						SCTPrecvPacket((unsigned char *) payload, sock, sctpId, flows[id].minPayloadSize,
+						SCTPrecvPacket((unsigned char *) payload, sock, sctpId, flows[id].min_p_size,
 								flows[id].payloadLogType);
 					}
 #endif
@@ -3782,7 +3782,7 @@ void printHelp()
 		"                                  supported random distribution (e.g. -B C 1000 C 1000).\n\n";
 #endif
 
-	cout << "\n  Packet size options (ps_opts):\n\n"
+	cout << "\n  Packet itg_size options (ps_opts):\n\n"
 
 		"     -c  <pkt_size>           Constant (default: " << DefaultPktSize << " bytes).\n\n"
 
@@ -4238,9 +4238,9 @@ void closedFlowErr(int flowId, int signalSock)
 
 	next = putValue(&Messaggio, (void *) &type, sizeof(type));
 	next = putValue(next, (void *) &net_flowId, sizeof(int));
-	int size;
-	size = send(signalSock, (char *) &Messaggio, sizeMessag, 0);
-	if (size < 0) {
+	int itg_size;
+	itg_size = send(signalSock, (char *) &Messaggio, sizeMessag, 0);
+	if (itg_size < 0) {
 		printf("error into send\n");
 		memClean();
 		exit(1);

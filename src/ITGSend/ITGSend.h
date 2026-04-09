@@ -107,7 +107,7 @@ struct flowDescriptor {
 	int sctpId;
 #endif
 
-	int minPayloadSize;
+	int min_p_size;
 	int payloadLogType;
 
 	char payloadFile[DIM_PAYLOAD_FILE]; 		
