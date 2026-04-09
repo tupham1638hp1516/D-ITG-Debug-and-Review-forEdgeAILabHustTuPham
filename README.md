@@ -2,6 +2,7 @@
 # D-ITG Debugging and Network Evaluation
 
 ## Giới thiệu
+Dự án gốc thuộc sở hữu của tác giả Javier Búcar, tuy nhiên do được code từ năm 2013 nên khi được biên dịch ở môi trường hiện đại gặp phải nhiều vấn đề.
 Dự án này lưu trữ toàn bộ quá trình xử lý lỗi mã nguồn, biên dịch và thực nghiệm trích xuất số liệu chất lượng mạng (QoS) sử dụng công cụ D-ITG (Distributed Internet Traffic Generator).
 
 ## Cấu trúc Repository
