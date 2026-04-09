@@ -8,7 +8,7 @@ Dự án này lưu trữ toàn bộ quá trình xử lý lỗi mã nguồn, biê
 * `fixed_ditg.zip`: Chứa toàn bộ mã nguồn D-ITG đã được Refactor, file thực thi và các log file liên quan.
 * `ket_qua_chi_tiet.txt`: Dữ liệu thô (Raw Data) đã được giải mã từ định dạng nhị phân, chứa thông tin chi tiết hàng ngàn gói tin (Flow, Seq, txTime, rxTime...).
 
-## 🐛 Báo cáo Xử lý Lỗi (Troubleshooting & Refactoring)
+## Báo cáo Xử lý Lỗi (Troubleshooting & Refactoring)
 Mã nguồn gốc (Legacy Code) phát sinh xung đột khi biên dịch trên môi trường C++17 trở lên. Dưới đây là các kỹ thuật đã áp dụng:
 
 ### 1. Xử lý xung đột định danh (Name Collision)
