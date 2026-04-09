@@ -6,8 +6,10 @@ Dự án gốc thuộc sở hữu của tác giả Javier Búcar, tuy nhiên do 
 Dự án này lưu trữ toàn bộ quá trình xử lý lỗi mã nguồn, biên dịch và thực nghiệm trích xuất số liệu chất lượng mạng (QoS) sử dụng công cụ D-ITG (Distributed Internet Traffic Generator).
 
 ## Cấu trúc Repository
-* `fixed_ditg.zip`: Chứa toàn bộ mã nguồn D-ITG đã được Refactor, file thực thi và các log file liên quan.
-* `ket_qua_chi_tiet.txt`: Dữ liệu thô (Raw Data) đã được giải mã từ định dạng nhị phân, chứa thông tin chi tiết hàng ngàn gói tin (Flow, Seq, txTime, rxTime...).
+* `docs/`: Tài liệu tham khảo.
+* `results/`: Bao gồm các bài kiểm thử và nhận xét đánh giá QoS.
+* `src/`: Mã nguồn chạy D-ITG đã được chỉnh sửa.
+* `tools/`: Các công cụ hỗ trợ thực nghiệm.
 
 ## Báo cáo Xử lý Lỗi (Troubleshooting & Refactoring)
 Mã nguồn gốc D-ITG (Legacy Code từ năm 2013) phát sinh xung đột nghiêm trọng khi được biên dịch trên môi trường C++ hiện đại (chuẩn C++17 trở lên). Dưới đây là các kỹ thuật can thiệp mã nguồn đã được áp dụng để khôi phục khả năng thực thi:
