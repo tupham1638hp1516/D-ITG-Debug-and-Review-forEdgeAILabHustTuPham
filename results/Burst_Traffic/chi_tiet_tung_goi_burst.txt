@@ -1,0 +1,40 @@
+ITGDec version  (r)
+Compile-time options: bursty multiport
+Error 1 on packet loss time
+----------------------------------------------------------
+Flow number: 1
+From 127.0.0.1:48897
+To    127.0.0.1:8999
+----------------------------------------------------------
+Total time               =     30.065919 s
+Total packets            =          2387
+Minimum delay            =      0.000014 s
+Maximum delay            =      0.500612 s
+Average delay            =      0.002559 s
+Average jitter           =      0.004845 s
+Delay standard deviation =      0.035402 s
+Bytes received           =       1193500
+Average bitrate          =    317.568873 Kbit/s
+Average packet rate      =     79.392218 pkt/s
+Packets dropped          =             0 (0.00 %)
+Average loss-burst size  =      0.000000 pkt
+----------------------------------------------------------
+
+__________________________________________________________
+****************  TOTAL RESULTS   ******************
+__________________________________________________________
+Number of flows          =             1
+Total time               =     30.065919 s
+Total packets            =          2387
+Minimum delay            =      0.000014 s
+Maximum delay            =      0.500612 s
+Average delay            =      0.002559 s
+Average jitter           =      0.004845 s
+Delay standard deviation =      0.035402 s
+Bytes received           =       1193500
+Average bitrate          =    317.568873 Kbit/s
+Average packet rate      =     79.392218 pkt/s
+Packets dropped          =             0 (0.00 %)
+Average loss-burst size  =             0 pkt
+Error lines              =             0
+----------------------------------------------------------
