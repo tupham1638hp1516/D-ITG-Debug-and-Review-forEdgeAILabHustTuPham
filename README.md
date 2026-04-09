@@ -9,15 +9,20 @@ Dự án này lưu trữ toàn bộ quá trình xử lý lỗi mã nguồn, biê
 * `ket_qua_chi_tiet.txt`: Dữ liệu thô (Raw Data) đã được giải mã từ định dạng nhị phân, chứa thông tin chi tiết hàng ngàn gói tin (Flow, Seq, txTime, rxTime...).
 
 ## Báo cáo Xử lý Lỗi (Troubleshooting & Refactoring)
-Mã nguồn gốc (Legacy Code) phát sinh xung đột khi biên dịch trên môi trường C++17 trở lên. Dưới đây là các kỹ thuật đã áp dụng:
+Mã nguồn gốc D-ITG (Legacy Code từ năm 2013) phát sinh xung đột nghiêm trọng khi được biên dịch trên môi trường C++ hiện đại (chuẩn C++17 trở lên). Dưới đây là các kỹ thuật can thiệp mã nguồn đã được áp dụng để khôi phục khả năng thực thi:
 
-### 1. Xử lý xung đột định danh (Name Collision)
-* **Lỗi:** Cảnh báo `ambiguous "size"` tại `ITGDecod.cpp`. Trình biên dịch không thể phân biệt giữa biến toàn cục `size` của D-ITG và hàm `std::size` của thư viện chuẩn C++.
-* **Giải pháp:** Đổi tên (Rename Symbol) toàn bộ biến `size` thành `itg_size` để tách biệt Namespace.
+### Xử lý xung đột định danh (Name Collision)
+Vấn đề: Trình biên dịch báo lỗi ambiguous "size" hàng loạt tại file ITGDecod.cpp. Nguyên nhân là do khai báo using namespace std; khiến trình biên dịch không thể phân biệt giữa biến toàn cục size của phần mềm và hàm std::size mới được bổ sung vào thư viện chuẩn C++.
+### Giải pháp: 
+Đổi tên toàn bộ biến size thành itg_size trong file ITGDecod.cpp để đóng gói hoàn toàn Namespace, loại bỏ xung đột.
 
-### 2. Khắc phục lỗi mất liên kết cấu trúc dữ liệu
-* **Lỗi:** `struct info has no member named seqNum`.
-* **Giải pháp:** Vô hiệu hóa các logic tính toán phụ thuộc vào `seqNum` bị thiếu hụt trong file header lõi. Thay vì biên dịch thủ công từng file, tiến hành Master Build bằng lệnh `make clean` và `make` từ thư mục gốc `src` để đảm bảo hệ thống tự động thực hiện Dynamic Linking giữa các module (`common`, `libITG`).
+### Xử lý lỗi cấu trúc dữ liệu và Tái thiết lập quy trình Build (Master Build)
+Vấn đề: Trình biên dịch báo lỗi struct info has no member named seqNum. Nguyên nhân xuất phát từ sự thiếu đồng bộ của file header lõi (ITG.h) ở phiên bản cũ. Bên cạnh đó, việc biên dịch độc lập từng file (như ITGDecod.cpp) làm phá vỡ kiến trúc liên kết tĩnh của dự án.
+### Giải pháp:
+Can thiệp mã nguồn: Vô hiệu hóa (comment out) khối lệnh tính toán totalpktloss phụ thuộc vào trường (*infos).seqNum bị thiếu hụt (nằm tại khu vực dòng 1484-1485 của file ITGDecod.cpp).
+
+### Quy trình biên dịch: 
+Loại bỏ việc dùng lệnh g++ thủ công. Tiến hành Master Build bằng chuỗi lệnh make clean và make trực tiếp từ thư mục gốc src. Điều này buộc hệ thống tự động xử lý Dynamic Linking, liên kết chính xác các module dùng chung (common, libITG) để tạo ra file thực thi ITGDec hoàn chỉnh.
 
 ## Hướng dẫn Thực thi
 Để trích xuất dữ liệu từ file log đã bắt, sử dụng các lệnh sau trong Terminal (thư mục `src`):
